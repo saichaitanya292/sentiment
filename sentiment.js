@@ -1,16 +1,15 @@
-async function analyzeSentiment(text) {
-    const url = "https://bandlaguda-senti-api.hf.space/analyze";
+import { Client } from "@gradio/client";
 
-    const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: text })
+async function analyzeSentiment(text) {
+  try {
+    const client = await Client.connect("Bandlaguda/senti-api");
+
+    const result = await client.predict("/analyze", {
+      text: text
     });
 
-    if (!response.ok) {
-        const error = await response.text();
-        throw new Error("HTTP " + response.status + ": " + error);
-    }
-
-    return await response.json();
+    return result.data;   // This returns sentiment + confidence
+  } catch (err) {
+    return { error: err.toString() };
+  }
 }
