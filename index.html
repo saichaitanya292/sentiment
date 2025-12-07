@@ -15,22 +15,27 @@
 
  <script src="sentiment.js"></script>
 <script>
-    async function runSentiment() {
-        const text = document.getElementById("inputText").value;
-        const output = document.getElementById("output");
+async function runSentiment() {
+    const text = document.getElementById("inputText").value;
+    const output = document.getElementById("output");
 
-        output.innerText = "Loading...";
+    output.innerText = "Analyzing...";
 
-        try {
-            const result = await analyzeSentiment(text);
-            // For our Gradio app, result.data is ["Label: ...", "Score: ..."]
-            const [label, score] = result.data;
-            output.innerText = label + "\n" + score;
-        } catch (err) {
-            console.error(err);
-            output.innerText = "Error: " + err.message;
-        }
+    try {
+        const result = await analyzeSentiment(text);
+
+        // HuggingFace returned tuple → result = ["positive", 0.43]
+        const sentiment = result[0];
+        const confidence = result[1];
+
+        output.innerText =
+            "Sentiment: " + sentiment + "\n" +
+            "Confidence: " + confidence;
     }
+    catch (err) {
+        output.innerText = "Error: " + err.message;
+    }
+}
 </script>
 </body>
 </html>
