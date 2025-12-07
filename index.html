@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Multilingual Sentiment Analyzer</title>
+</head>
+<body>
+    <h2>Enter text in ANY language</h2>
+
+    <textarea id="inputText" rows="4" cols="40"></textarea><br><br>
+
+    <button onclick="runSentiment()">Analyze Sentiment</button>
+
+    <h3>Result:</h3>
+    <pre id="output"></pre>
+
+    <script src="sentiment.js"></script>
+    <script>
+        async function runSentiment() {
+            const text = document.getElementById("inputText").value;
+            const result = await analyzeSentiment(text);
+            document.getElementById("output").innerText = JSON.stringify(result, null, 2);
+        }
+    </script>
+</body>
+</html>
