@@ -1,6 +1,7 @@
 async function analyzeSentiment(text) {
     const response = await fetch(
-        "https://bandlaguda-senti-api.hf.space/api/predict/",
+        "https://bandlaguda-senti-api.hf.space/api/predict/
+senti-api",
         {
             method: "POST",
             headers: {
