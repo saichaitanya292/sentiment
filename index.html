@@ -3,15 +3,10 @@
 <head>
     <title>Multilingual Sentiment Analyzer</title>
 
-    <!-- Load Gradio Client -->
-    <script type="module">
-        import { Client } from "https://esm.sh/@gradio/client";
+    <!-- Load Gradio client from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js"></script>
 
-        // Expose Client globally
-        window.GradioClient = Client;
-    </script>
-
-    <!-- Load your JS -->
+    <!-- Load your JS file -->
     <script src="sentiment.js" defer></script>
 </head>
 
