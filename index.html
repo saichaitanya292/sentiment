@@ -2,7 +2,19 @@
 <html>
 <head>
     <title>Multilingual Sentiment Analyzer</title>
+
+    <!-- Load Gradio Client -->
+    <script type="module">
+        import { Client } from "https://esm.sh/@gradio/client";
+
+        // Expose Client globally
+        window.GradioClient = Client;
+    </script>
+
+    <!-- Load your JS -->
+    <script src="sentiment.js" defer></script>
 </head>
+
 <body>
     <h2>Enter text in ANY languages</h2>
 
@@ -12,30 +24,5 @@
 
     <h3>Result:</h3>
     <pre id="output"></pre>
-
- <script src="sentiment.js"></script>
-<script>
-async function runSentiment() {
-    const text = document.getElementById("inputText").value;
-    const output = document.getElementById("output");
-
-    output.innerText = "Analyzing...";
-
-    try {
-        const result = await analyzeSentiment(text);
-
-        // HuggingFace returned tuple → result = ["positive", 0.43]
-        const sentiment = result[0];
-        const confidence = result[1];
-
-        output.innerText =
-            "Sentiment: " + sentiment + "\n" +
-            "Confidence: " + confidence;
-    }
-    catch (err) {
-        output.innerText = "Error: " + err.message;
-    }
-}
-</script>
 </body>
 </html>
