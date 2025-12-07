@@ -1,15 +1,28 @@
-import { Client } from "@gradio/client";
-
+// This MUST be global
 async function analyzeSentiment(text) {
-  try {
-    const client = await Client.connect("Bandlaguda/senti-api");
+    try {
+        const client = await window.GradioClient.connect("Bandlaguda/senti-api");
 
-    const result = await client.predict("/analyze", {
-      text: text
-    });
+        const result = await client.predict("/analyze", {
+            text: text
+        });
 
-    return result.data;   // This returns sentiment + confidence
-  } catch (err) {
-    return { error: err.toString() };
-  }
+        return result.data;
+    } catch (err) {
+        return { error: err.toString() };
+    }
+}
+
+async function runSentiment() {
+    const text = document.getElementById("inputText").value;
+
+    try {
+        const result = await analyzeSentiment(text);
+
+        document.getElementById("output").innerText =
+            JSON.stringify(result, null, 2);
+    } catch (err) {
+        document.getElementById("output").innerText =
+            "Error: " + err.toString();
+    }
 }
