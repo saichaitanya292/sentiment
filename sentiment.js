@@ -1,10 +1,10 @@
-// This MUST be global
+// Use the library loaded from CDN
 async function analyzeSentiment(text) {
     try {
-        const client = await window.GradioClient.connect("Bandlaguda/senti-api");
+        const client = await window.gradioClient.Client.connect("Bandlaguda/senti-api");
 
         const result = await client.predict("/analyze", {
-            text: text
+            text: text,
         });
 
         return result.data;
