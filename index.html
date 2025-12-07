@@ -1,23 +1,226 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Multilingual Sentiment Analyzer</title>
+  <meta charset="UTF-8" />
+  <title>Multilingual Sentiment Analyzer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Load Gradio client from CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js"></script>
-
-    <!-- Load your JS file -->
-    <script src="sentiment.js" defer></script>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<body class="min-h-screen bg-slate-100 flex items-center justify-center px-4">
 
-<body>
-    <h2>Enter text in ANY languages</h2>
+  <div class="max-w-2xl w-full bg-white rounded-2xl shadow-xl p-6 sm:p-8 space-y-6">
+    <!-- Header -->
+    <div class="space-y-1">
+      <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">
+        Multilingual Sentiment Analyzer
+      </h1>
+      <p class="text-sm sm:text-base text-slate-500">
+        Type any text in any language. We’ll detect the sentiment using a multilingual transformer model
+        hosted on Hugging Face Spaces.
+      </p>
+    </div>
 
-    <textarea id="inputText" rows="4" cols="40"></textarea><br><br>
+    <!-- Input -->
+    <div class="space-y-2">
+      <label for="inputText" class="block text-sm font-medium text-slate-700">
+        Text to analyze
+      </label>
+      <textarea
+        id="inputText"
+        rows="4"
+        class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm sm:text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+        placeholder="Example: I love this product, it works perfectly!"
+      ></textarea>
+      <p id="helper" class="text-xs text-slate-400">
+        Supports English, Hindi, Spanish, French, and many more languages.
+      </p>
+    </div>
 
-    <button onclick="runSentiment()">Analyze Sentiment</button>
+    <!-- Actions -->
+    <div class="flex flex-wrap items-center gap-3">
+      <button
+        id="analyzeBtn"
+        class="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed"
+      >
+        Analyze Sentiment
+      </button>
 
-    <h3>Result:</h3>
-    <pre id="output"></pre>
+      <button
+        id="clearBtn"
+        class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 bg-white hover:bg-slate-50"
+      >
+        Clear
+      </button>
+
+      <span id="status" class="text-xs text-slate-500"></span>
+    </div>
+
+    <!-- Result -->
+    <div class="border-t border-slate-200 pt-4 space-y-4">
+      <h2 class="text-lg font-semibold text-slate-900">
+        Result
+      </h2>
+
+      <div id="noResult" class="text-sm text-slate-400">
+        No analysis yet. Enter some text and click <span class="font-medium">Analyze Sentiment</span>.
+      </div>
+
+      <div id="resultCard" class="hidden space-y-3">
+        <!-- Sentiment badge -->
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-slate-500">Sentiment:</span>
+          <span
+            id="sentimentBadge"
+            class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-700"
+          >
+            -
+          </span>
+        </div>
+
+        <!-- Confidence bar -->
+        <div class="space-y-1">
+          <div class="flex justify-between text-xs text-slate-500">
+            <span>Confidence</span>
+            <span id="confidenceText">0%</span>
+          </div>
+          <div class="h-2 w-full rounded-full bg-slate-200 overflow-hidden">
+            <div
+              id="confidenceBar"
+              class="h-full w-0 rounded-full bg-indigo-500 transition-all duration-300"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Raw JSON -->
+        <details class="mt-2">
+          <summary class="cursor-pointer text-xs text-slate-500 hover:text-slate-700">
+            View raw response
+          </summary>
+          <pre
+            id="rawJson"
+            class="mt-1 max-h-40 overflow-auto rounded-lg bg-slate-900 text-xs text-slate-100 p-3"
+          ></pre>
+        </details>
+      </div>
+
+      <!-- Error -->
+      <div id="errorBox" class="hidden rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="pt-2 border-t border-slate-100 text-[11px] text-slate-400 flex flex-wrap justify-between gap-2">
+      <span>Model: <span class="font-medium">cardiffnlp/twitter-xlm-roberta-base-sentiment</span></span>
+      <span>Backend: Hugging Face Spaces · Frontend: GitHub Pages</span>
+    </div>
+  </div>
+
+  <!-- Logic -->
+  <script type="module">
+    import { Client } from "https://esm.sh/@gradio/client";
+
+    const analyzeBtn   = document.getElementById("analyzeBtn");
+    const clearBtn     = document.getElementById("clearBtn");
+    const inputEl      = document.getElementById("inputText");
+    const statusEl     = document.getElementById("status");
+    const noResultEl   = document.getElementById("noResult");
+    const resultCard   = document.getElementById("resultCard");
+    const sentimentBadge = document.getElementById("sentimentBadge");
+    const confidenceText = document.getElementById("confidenceText");
+    const confidenceBar  = document.getElementById("confidenceBar");
+    const rawJsonEl    = document.getElementById("rawJson");
+    const errorBox     = document.getElementById("errorBox");
+
+    // Create client once and reuse
+    const clientPromise = Client.connect("Bandlaguda/senti-api");
+
+    function setLoading(isLoading) {
+      analyzeBtn.disabled = isLoading;
+      statusEl.textContent = isLoading ? "Running model on Hugging Face…" : "";
+    }
+
+    function updateSentimentBadge(label) {
+      const baseClasses =
+        "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold";
+
+      let extra = " bg-slate-100 text-slate-700";
+      const lower = (label || "").toLowerCase();
+
+      if (lower.includes("positive")) {
+        extra = " bg-emerald-100 text-emerald-800";
+      } else if (lower.includes("negative")) {
+        extra = " bg-rose-100 text-rose-800";
+      } else if (lower.includes("neutral") || lower.includes("mixed")) {
+        extra = " bg-amber-100 text-amber-800";
+      }
+
+      sentimentBadge.className = baseClasses + extra;
+      sentimentBadge.textContent = label || "-";
+    }
+
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.classList.remove("hidden");
+    }
+
+    function clearError() {
+      errorBox.textContent = "";
+      errorBox.classList.add("hidden");
+    }
+
+    clearBtn.addEventListener("click", () => {
+      inputEl.value = "";
+      noResultEl.classList.remove("hidden");
+      resultCard.classList.add("hidden");
+      clearError();
+      rawJsonEl.textContent = "";
+      confidenceBar.style.width = "0%";
+      confidenceText.textContent = "0%";
+    });
+
+    analyzeBtn.addEventListener("click", async () => {
+      const text = inputEl.value.trim();
+      clearError();
+
+      if (!text) {
+        showError("Please enter some text to analyze.");
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        const client = await clientPromise;
+
+        const result = await client.predict("/analyze", {
+          text: text
+        });
+
+        // Expecting tuple: [sentiment: str, confidence: float]
+        const data = result?.data || result;
+        const sentiment = data[0];
+        const confidence = Number(data[1] ?? 0);
+
+        // Update UI
+        noResultEl.classList.add("hidden");
+        resultCard.classList.remove("hidden");
+
+        updateSentimentBadge(sentiment);
+
+        const pct = Math.max(0, Math.min(100, confidence * 100));
+        confidenceText.textContent = pct.toFixed(1) + "%";
+        confidenceBar.style.width = pct + "%";
+
+        rawJsonEl.textContent = JSON.stringify(result, null, 2);
+      } catch (err) {
+        console.error(err);
+        showError("Error calling Hugging Face Space: " + err);
+      } finally {
+        setLoading(false);
+      }
+    });
+  </script>
 </body>
 </html>
