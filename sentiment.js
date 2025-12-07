@@ -1,26 +1,16 @@
 async function analyzeSentiment(text) {
-    const response = await fetch(
-        "https://bandlaguda-senti-api.hf.space/api/predict/
-senti-api",
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            // Gradio expects inputs wrapped as an array in `data`
-            body: JSON.stringify({
-                data: [text]
-            })
-        }
-    );
+    const url = "https://bandlaguda-senti-api.hf.space/analyze";
 
-    // if 404/500 etc – throw with message text (what you see now)
+    const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: text })
+    });
+
     if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error("HTTP " + response.status + ": " + errorText);
+        const error = await response.text();
+        throw new Error("HTTP " + response.status + ": " + error);
     }
 
-    const result = await response.json();
-    console.log("HF result:", result); // check in DevTools
-    return result;
+    return await response.json();
 }
