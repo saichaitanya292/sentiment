@@ -13,13 +13,24 @@
     <h3>Result:</h3>
     <pre id="output"></pre>
 
-    <script src="sentiment.js"></script>
-    <script>
-        async function runSentiment() {
-            const text = document.getElementById("inputText").value;
+ <script src="sentiment.js"></script>
+<script>
+    async function runSentiment() {
+        const text = document.getElementById("inputText").value;
+        const output = document.getElementById("output");
+
+        output.innerText = "Loading...";
+
+        try {
             const result = await analyzeSentiment(text);
-            document.getElementById("output").innerText = JSON.stringify(result, null, 2);
+            // For our Gradio app, result.data is ["Label: ...", "Score: ..."]
+            const [label, score] = result.data;
+            output.innerText = label + "\n" + score;
+        } catch (err) {
+            console.error(err);
+            output.innerText = "Error: " + err.message;
         }
-    </script>
+    }
+</script>
 </body>
 </html>
