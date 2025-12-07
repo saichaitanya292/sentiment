@@ -2,300 +2,213 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Multilingual Sentiment Analyzer</title>
+  <title>Multilingual Sentiment Analyzer + URL Review Analyzer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="min-h-screen bg-slate-100 flex items-center justify-center px-4">
 
-  <div class="max-w-2xl w-full bg-white rounded-2xl shadow-xl p-6 sm:p-8 space-y-6">
-    <!-- Header -->
+  <div class="max-w-3xl w-full bg-white rounded-2xl shadow-xl p-6 sm:p-8 space-y-8">
+    
+    <!-- HEADER -->
     <div class="space-y-1">
-      <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">
-        Multilingual Sentiment Analyzer
-      </h1>
-      <p class="text-sm sm:text-base text-slate-500">
-        Type any text in any language. We’ll detect the sentiment using a multilingual transformer model
-        hosted on Hugging Face Spaces.
-      </p>
+      <h1 class="text-3xl font-bold text-slate-900">Multilingual Sentiment Analyzer</h1>
+      <p class="text-sm text-slate-500">Analyze text OR an entire webpage reviews (URL). Supports 100+ languages.</p>
     </div>
 
-    <!-- Input -->
-    <div class="space-y-2">
-  <label for="inputText" class="block text-sm font-medium text-slate-700">
-    Text to analyze
-  </label>
 
-  <div class="flex gap-2">
-    <textarea
-      id="inputText"
-      rows="4"
-      class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm sm:text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-      placeholder="Example: I love this product, it works perfectly!"
-    ></textarea>
+    <!-- TEXT ANALYZER -->
+    <div>
+      <h2 class="text-xl font-semibold text-slate-800 mb-2">Text Analyzer</h2>
 
-    <!-- Mic button -->
-    <button
-      id="voiceBtn"
-      type="button"
-      class="self-start inline-flex items-center justify-center rounded-full border border-slate-300 bg-white p-2 text-slate-600 hover:bg-slate-50 hover:border-indigo-400 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-      title="Speak instead of typing"
-    >
-      🎤
-    </button>
-  </div>
+      <div class="space-y-2">
+        <textarea id="inputText" rows="4"
+          class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500"
+          placeholder="Type or speak your sentence..."></textarea>
 
-  <p id="helper" class="text-xs text-slate-400">
-    Supports English, Hindi, Spanish, French, and many more languages. You can also use the mic button to speak your text (Chrome / Edge only).
-  </p>
-</div>
+        <!-- Mic Button -->
+        <button id="voiceBtn"
+          class="rounded-full border border-slate-300 bg-white p-2 text-slate-700 hover:bg-slate-50">
+          🎤
+        </button>
 
-    <!-- Actions -->
-    <div class="flex flex-wrap items-center gap-3">
-      <button
-        id="analyzeBtn"
-        class="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed"
-      >
-        Analyze Sentiment
-      </button>
+        <button id="analyzeBtn"
+          class="mt-2 w-full bg-indigo-600 text-white px-4 py-2 rounded-xl font-semibold hover:bg-indigo-700">
+          Analyze Sentiment
+        </button>
 
-      <button
-        id="clearBtn"
-        class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 bg-white hover:bg-slate-50"
-      >
-        Clear
-      </button>
-
-      <span id="status" class="text-xs text-slate-500"></span>
-    </div>
-
-    <!-- Result -->
-    <div class="border-t border-slate-200 pt-4 space-y-4">
-      <h2 class="text-lg font-semibold text-slate-900">
-        Result
-      </h2>
-
-      <div id="noResult" class="text-sm text-slate-400">
-        No analysis yet. Enter some text and click <span class="font-medium">Analyze Sentiment</span>.
+        <p id="helper" class="text-xs text-slate-400">
+          Click the mic to speak. Works best in Chrome/Edge.
+        </p>
       </div>
 
-      <div id="resultCard" class="hidden space-y-3">
-        <!-- Sentiment badge -->
-        <div class="flex items-center gap-2">
-          <span class="text-sm text-slate-500">Sentiment:</span>
-          <span
-            id="sentimentBadge"
-            class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-700"
-          >
-            -
-          </span>
+      <!-- RESULT -->
+      <div class="mt-4">
+        <h3 class="font-medium text-slate-700">Result:</h3>
+        <pre id="output"
+          class="mt-1 max-h-52 overflow-auto rounded-xl bg-slate-900 text-xs text-slate-100 p-3 border border-slate-700"></pre>
+      </div>
+    </div>
+
+
+
+    <!-- URL ANALYZER -->
+    <div>
+      <h2 class="text-xl font-semibold text-slate-800 mb-2">Analyze Reviews from URL</h2>
+
+      <div class="space-y-2">
+        <div class="flex flex-col sm:flex-row gap-2">
+          <input id="urlInput"
+            class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm shadow-sm"
+            placeholder="https://saichaitanya292.github.io/appwebsite/" />
+
+          <button id="urlBtn"
+            class="rounded-xl bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-100 hover:bg-slate-700">
+            Analyze URL
+          </button>
         </div>
 
-        <!-- Confidence bar -->
-        <div class="space-y-1">
-          <div class="flex justify-between text-xs text-slate-500">
-            <span>Confidence</span>
-            <span id="confidenceText">0%</span>
-          </div>
-          <div class="h-2 w-full rounded-full bg-slate-200 overflow-hidden">
-            <div
-              id="confidenceBar"
-              class="h-full w-0 rounded-full bg-indigo-500 transition-all duration-300"
-            ></div>
-          </div>
-        </div>
+        <p class="text-xs text-slate-400">
+          Only use pages you own or are allowed to analyze (your own product/review pages).
+        </p>
 
-        <!-- Raw JSON -->
-        <details class="mt-2">
-          <summary class="cursor-pointer text-xs text-slate-500 hover:text-slate-700">
-            View raw response
-          </summary>
-          <pre
-            id="rawJson"
-            class="mt-1 max-h-40 overflow-auto rounded-lg bg-slate-900 text-xs text-slate-100 p-3"
-          ></pre>
-        </details>
-      </div>
-
-      <!-- Error -->
-      <div id="errorBox" class="hidden rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+        <pre id="urlOutput"
+          class="mt-2 max-h-52 overflow-auto rounded-xl bg-slate-900 text-xs text-slate-100 p-3 border border-slate-700"></pre>
       </div>
     </div>
 
-    <!-- Footer -->
-    <div class="pt-2 border-t border-slate-100 text-[11px] text-slate-400 flex flex-wrap justify-between gap-2">
-      <span>Model: <span class="font-medium">cardiffnlp/twitter-xlm-roberta-base-sentiment</span></span>
-      <span>Backend: Hugging Face Spaces · Frontend: GitHub Pages</span>
+
+
+    <!-- FOOTER -->
+    <div class="pt-4 border-t text-xs text-slate-500">
+      Backend: Hugging Face Spaces (Bandlaguda/senti-api) · Frontend: Tailwind + JS
     </div>
+
   </div>
 
-  <!-- Logic -->
+
+
+
+  <!-- MAIN SCRIPT -->
   <script type="module">
     import { Client } from "https://esm.sh/@gradio/client";
 
-    const analyzeBtn   = document.getElementById("analyzeBtn");
-    const clearBtn     = document.getElementById("clearBtn");
-    const inputEl      = document.getElementById("inputText");
-    const statusEl     = document.getElementById("status");
-    const noResultEl   = document.getElementById("noResult");
-    const resultCard   = document.getElementById("resultCard");
-    const sentimentBadge = document.getElementById("sentimentBadge");
-    const confidenceText = document.getElementById("confidenceText");
-    const confidenceBar  = document.getElementById("confidenceBar");
-    const rawJsonEl    = document.getElementById("rawJson");
-    const errorBox     = document.getElementById("errorBox");
+    const clientPromise = Client.connect("Bandlaguda/senti-api");
 
-        // ---- Voice input (Web Speech API) ----
+    const inputEl = document.getElementById("inputText");
+    const outputEl = document.getElementById("output");
+    const analyzeBtn = document.getElementById("analyzeBtn");
+
+    /* ---------------- TEXT ANALYZER ---------------- */
+    async function analyzeText() {
+      const text = inputEl.value.trim();
+      if (!text) {
+        outputEl.textContent = "Please enter some text.";
+        return;
+      }
+
+      outputEl.textContent = "Analyzing…";
+
+      try {
+        const client = await clientPromise;
+        const result = await client.predict("/analyze", { text });
+
+        const sentiment = result.data?.[0] ?? "";
+        const confidence = result.data?.[1] ?? 0;
+
+        outputEl.textContent =
+          "Sentiment: " + sentiment + "\nConfidence: " + (confidence * 100).toFixed(1) + "%";
+      } catch (err) {
+        outputEl.textContent = "Error: " + err;
+      }
+    }
+
+    analyzeBtn.addEventListener("click", analyzeText);
+
+
+
+    /* ---------------- VOICE INPUT ---------------- */
     const voiceBtn = document.getElementById("voiceBtn");
-    const helper    = document.getElementById("helper");
+    const helper = document.getElementById("helper");
 
     let recognition = null;
     let listening = false;
 
-    function initSpeechRecognition() {
+    function initSpeech() {
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SR) {
-        helper.textContent = "Voice input not supported in this browser. Please use Chrome or Edge on desktop.";
+        helper.textContent = "Voice input not supported in this browser.";
         voiceBtn.disabled = true;
-        voiceBtn.classList.add("opacity-50", "cursor-not-allowed");
         return;
       }
 
       recognition = new SR();
-      recognition.lang = "en-US"; // You can change or even detect language
+      recognition.lang = "en-US";
       recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
 
-      recognition.addEventListener("start", () => {
+      recognition.onstart = () => {
         listening = true;
         voiceBtn.textContent = "🛑";
-        helper.textContent = "Listening… speak now.";
-      });
+        helper.textContent = "Listening…";
+      };
 
-      recognition.addEventListener("end", () => {
+      recognition.onend = () => {
         listening = false;
         voiceBtn.textContent = "🎤";
-        helper.textContent = "Supports text and voice input. Click the mic and speak clearly.";
-      });
+        helper.textContent = "Click the mic to speak.";
+      };
 
-      recognition.addEventListener("result", (event) => {
+      recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
-        // Append to existing text
-        const prev = inputEl.value.trim();
-        inputEl.value = prev ? prev + " " + transcript : transcript;
-      });
-
-      recognition.addEventListener("error", (event) => {
-        console.error("Speech recognition error:", event.error);
-        showError("Voice input error: " + event.error);
-      });
+        inputEl.value += (inputEl.value ? " " : "") + transcript;
+      };
     }
 
-    initSpeechRecognition();
+    initSpeech();
 
     voiceBtn.addEventListener("click", () => {
-      if (!recognition) {
-        showError("Voice input is not supported in this browser.");
-        return;
-      }
-
-      if (!listening) {
-        clearError();
-        recognition.start();
-      } else {
-        recognition.stop();
-      }
-    });    
-    // Create client once and reuse
-    const clientPromise = Client.connect("Bandlaguda/senti-api");
-
-    function setLoading(isLoading) {
-      analyzeBtn.disabled = isLoading;
-      statusEl.textContent = isLoading ? "Running model on Hugging Face…" : "";
-    }
-
-    function updateSentimentBadge(label) {
-      const baseClasses =
-        "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold";
-
-      let extra = " bg-slate-100 text-slate-700";
-      const lower = (label || "").toLowerCase();
-
-      if (lower.includes("positive")) {
-        extra = " bg-emerald-100 text-emerald-800";
-      } else if (lower.includes("negative")) {
-        extra = " bg-rose-100 text-rose-800";
-      } else if (lower.includes("neutral") || lower.includes("mixed")) {
-        extra = " bg-amber-100 text-amber-800";
-      }
-
-      sentimentBadge.className = baseClasses + extra;
-      sentimentBadge.textContent = label || "-";
-    }
-
-    function showError(message) {
-      errorBox.textContent = message;
-      errorBox.classList.remove("hidden");
-    }
-
-    function clearError() {
-      errorBox.textContent = "";
-      errorBox.classList.add("hidden");
-    }
-
-    clearBtn.addEventListener("click", () => {
-      inputEl.value = "";
-      noResultEl.classList.remove("hidden");
-      resultCard.classList.add("hidden");
-      clearError();
-      rawJsonEl.textContent = "";
-      confidenceBar.style.width = "0%";
-      confidenceText.textContent = "0%";
+      if (!recognition) return;
+      if (!listening) recognition.start();
+      else recognition.stop();
     });
 
-    analyzeBtn.addEventListener("click", async () => {
-      const text = inputEl.value.trim();
-      clearError();
 
-      if (!text) {
-        showError("Please enter some text to analyze.");
+
+    /* ---------------- URL ANALYZER ---------------- */
+    const urlInput = document.getElementById("urlInput");
+    const urlBtn = document.getElementById("urlBtn");
+    const urlOutput = document.getElementById("urlOutput");
+
+    urlBtn.addEventListener("click", async () => {
+      const url = urlInput.value.trim();
+      if (!url) {
+        urlOutput.textContent = "Please enter a URL.";
         return;
       }
 
-      setLoading(true);
+      urlOutput.textContent = "Fetching reviews…";
+      urlBtn.disabled = true;
 
       try {
         const client = await clientPromise;
 
-        const result = await client.predict("/analyze", {
-          text: text
-        });
+        // MUST match api_name="analyze_url" from your app.py
+        const result = await client.predict("/analyze_url", { url });
 
-        // Expecting tuple: [sentiment: str, confidence: float]
-        const data = result?.data || result;
-        const sentiment = data[0];
-        const confidence = Number(data[1] ?? 0);
+        const summary = result.data?.[0] ?? "";
+        const details = result.data?.[1] ?? {};
 
-        // Update UI
-        noResultEl.classList.add("hidden");
-        resultCard.classList.remove("hidden");
-
-        updateSentimentBadge(sentiment);
-
-        const pct = Math.max(0, Math.min(100, confidence * 100));
-        confidenceText.textContent = pct.toFixed(1) + "%";
-        confidenceBar.style.width = pct + "%";
-
-        rawJsonEl.textContent = JSON.stringify(result, null, 2);
+        urlOutput.textContent =
+          summary + "\n\nDetails:\n" + JSON.stringify(details, null, 2);
       } catch (err) {
-        console.error(err);
-        showError("Error calling Hugging Face Space: " + err);
-      } finally {
-        setLoading(false);
+        urlOutput.textContent = "Error: " + err;
       }
+
+      urlBtn.disabled = false;
     });
+
   </script>
+
 </body>
 </html>
