@@ -6,19 +6,20 @@ async function analyzeSentiment(text) {
             headers: {
                 "Content-Type": "application/json"
             },
-            // Gradio expects { data: [ ...inputs... ] }
+            // Gradio expects inputs wrapped as an array in `data`
             body: JSON.stringify({
                 data: [text]
             })
         }
     );
 
+    // if 404/500 etc – throw with message text (what you see now)
     if (!response.ok) {
         const errorText = await response.text();
         throw new Error("HTTP " + response.status + ": " + errorText);
     }
 
     const result = await response.json();
-    console.log("HF result:", result);
+    console.log("HF result:", result); // check in DevTools
     return result;
 }
